@@ -23,14 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import com.example.huertoonline.ui.theme.HuertoonlineTheme
+import com.example.huertoonline.ui.theme.HuertoOnlineTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HuertoonlineTheme {
+            HuertoOnlineTheme {
                 HuertoonlineApp()
             }
         }
@@ -88,7 +88,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    HuertoonlineTheme {
+    HuertoOnlineTheme {
         Greeting("Android")
     }
 }

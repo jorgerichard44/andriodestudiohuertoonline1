@@ -27,7 +27,7 @@ fun ProductoCard(
         Column {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(producto.imagen)
+                    .data(producto.imagenUrl)
                     .crossfade(true)
                     .build(),
                 contentDescription = "Imagen de ${producto.nombre}",
