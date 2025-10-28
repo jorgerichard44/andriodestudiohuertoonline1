@@ -1,16 +1,16 @@
 package com.example.huertoonline.ui.theme.stock
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.huertoonline.data.model.Producto
 import com.example.huertoonline.data.repository.CarritoRepository
 import com.example.huertoonline.data.repository.ProductoRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 data class StockUiState(
-    val categoriaSeleccionada: String = "Todos",
     val searchQuery: String = "",
+    val categoriaSeleccionada: String = "Todos",
     val productosFiltrados: List<Producto> = emptyList()
 )
 
@@ -22,39 +22,40 @@ class StockViewModel(
     private val _uiState = MutableStateFlow(StockUiState())
     val uiState: StateFlow<StockUiState> = _uiState.asStateFlow()
 
-    val productos = productoRepository.productos
+    // CORRECCIÓN 1: Se accede a la propiedad 'productos' en lugar de llamar a 'getProductos()'
+    val productos: StateFlow<List<Producto>> = productoRepository.productos
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun onCategoriaChange(categoria: String) {
-        _uiState.value = _uiState.value.copy(categoriaSeleccionada = categoria)
-        filtrarProductos()
+    init {
+        combine(productos, uiState) { productos, state ->
+            val filtered = if (state.searchQuery.isBlank() && state.categoriaSeleccionada == "Todos") {
+                productos
+            } else {
+                productos.filter { producto ->
+                    val matchesCategory = state.categoriaSeleccionada == "Todos" ||
+                            producto.categoria == state.categoriaSeleccionada
+                    val matchesQuery = state.searchQuery.isBlank() ||
+                            producto.nombre.contains(state.searchQuery, ignoreCase = true)
+                    matchesCategory && matchesQuery
+                }
+            }
+            _uiState.update { it.copy(productosFiltrados = filtered) }
+        }.launchIn(viewModelScope)
     }
 
     fun onSearchQueryChange(query: String) {
-        _uiState.value = _uiState.value.copy(searchQuery = query)
-        filtrarProductos()
+        _uiState.update { it.copy(searchQuery = query) }
     }
 
-    private fun filtrarProductos() {
-        val categoria = _uiState.value.categoriaSeleccionada
-        val query = _uiState.value.searchQuery.lowercase()
-
-        var productosFiltrados = if (categoria == "Todos") {
-            productos.value
-        } else {
-            productos.value.filter { it.categoria == categoria }
-        }
-
-        if (query.isNotBlank()) {
-            productosFiltrados = productosFiltrados.filter {
-                it.nombre.lowercase().contains(query) ||
-                        it.descripcion.lowercase().contains(query)
-            }
-        }
-
-        _uiState.value = _uiState.value.copy(productosFiltrados = productosFiltrados)
+    fun onCategoriaChange(categoria: String) {
+        _uiState.update { it.copy(categoriaSeleccionada = categoria) }
     }
 
-    fun agregarAlCarrito(producto: Producto, cantidad: Int = 1) {
-        carritoRepository.agregarItem(producto, cantidad)
+    fun agregarAlCarrito(producto: Producto) {
+        viewModelScope.launch {
+            // CORRECCIÓN 2: Se llama a 'agregarItem' en lugar de 'agregarProducto'
+            carritoRepository.agregarItem(producto)
+            // Opcional: Mostrar un Snackbar/Toast de confirmación
+        }
     }
 }

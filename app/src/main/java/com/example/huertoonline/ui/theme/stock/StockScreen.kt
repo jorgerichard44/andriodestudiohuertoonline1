@@ -1,7 +1,5 @@
 package com.example.huertoonline.ui.theme.stock
 
-package com.example.huertoonline.ui.stock
-
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -11,8 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.huertoonline.data.model.Producto
 import com.example.huertoonline.ui.components.ProductoCard
 import com.example.huertoonline.utils.Constants
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +24,6 @@ fun StockScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val productos by viewModel.productos.collectAsState()
-    var showSearch by remember { mutableStateOf(false) }
 
     val productosMostrar = if (uiState.productosFiltrados.isNotEmpty() ||
         uiState.searchQuery.isNotBlank() ||
@@ -48,29 +48,23 @@ fun StockScreen(
                 .padding(padding)
         ) {
             // Barra de búsqueda
-            AnimatedVisibility(
-                visible = showSearch,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                OutlinedTextField(
-                    value = uiState.searchQuery,
-                    onValueChange = { viewModel.onSearchQueryChange(it) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    placeholder = { Text("Buscar productos...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    trailingIcon = {
-                        if (uiState.searchQuery.isNotBlank()) {
-                            IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Limpiar")
-                            }
+            OutlinedTextField(
+                value = uiState.searchQuery,
+                onValueChange = { viewModel.onSearchQueryChange(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                placeholder = { Text("Buscar productos...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (uiState.searchQuery.isNotBlank()) {
+                        IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Limpiar")
                         }
-                    },
-                    singleLine = true
-                )
-            }
+                    }
+                },
+                singleLine = true
+            )
 
             // Filtros de categoría
             ScrollableTabRow(
@@ -91,10 +85,10 @@ fun StockScreen(
             if (productosMostrar.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     Column(
-                        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(

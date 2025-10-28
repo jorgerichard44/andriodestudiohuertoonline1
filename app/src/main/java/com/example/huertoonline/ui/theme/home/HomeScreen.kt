@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.huertoonline.data.model.Producto
 import com.example.huertoonline.ui.components.CarouselBanner
 import com.example.huertoonline.ui.components.ProductoCard
 import com.example.huertoonline.utils.Constants
@@ -147,6 +146,7 @@ fun HomeScreen(
                     ProductoCard(
                         producto = producto,
                         onClick = { onProductoClick(producto.id) },
+                        onAddToCart = { viewModel.agregarAlCarrito(producto) },
                         modifier = Modifier.width(180.dp)
                     )
                 }
